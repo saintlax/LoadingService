@@ -32,8 +32,8 @@ Content-Type: application/json
 
 {
 "txref": "CKA-001",
-"weightLimit": 50,
-"battery": 75,
+"weightLimit": 20,
+"battery": 85,
 "boxStatus": "IDLE"
 }
 
@@ -41,16 +41,46 @@ Content-Type: application/json
 {
 "id": 1,
 "txref": "CKA-001",
-"weightLimit": 50,
-"battery": 75,
-"boxStatus": "IDLE"
+"weightLimit": 20,
+"battery": "FULL",
+"state": "IDLE"
+}
+
+
+## Sample Errors
+{
+"errors": [
+"txref: must not be blank",
+"weightLimit: must be greater than or equal to 1"
+]
 }
 
 ## Load Items into a Box
 # Request
-POST http://localhost:8080/api/loadbox/CKA-001
+POST http://localhost:8080/api/loadbox/box-002
 Content-Type: application/json
 
+{
+"items": [
+{
+"id": 1,
+"name": "Paracetamol",
+"weight": 10,
+"code": "ITEM001",
+"boxTxref": "uty"
+},
+{
+"id": 2,
+"name": "Glucose",
+"weight": 5,
+"code": "ITEM002",
+"boxTxref": "uty"
+}
+]
+
+}
+
+# Response 
 [
 {
 "name": "Paracetamol",
@@ -64,23 +94,47 @@ Content-Type: application/json
 }
 ]
 
-# Response 
+## Get items
+GET http://localhost:8080/api/getItems/ITEM002
+# Response
 [
 {
-"id": 1,
 "name": "Paracetamol",
 "weight": 10,
-"code": "ITEM001",
-"txref": "CKA-001"
+"code": "ITEM001"
 },
 {
-"id": 2,
 "name": "Glucose",
 "weight": 5,
-"code": "ITEM002",
-"txref": "CKA-001"
+"code": "ITEM002"
 }
 ]
 
 
+## Get All available boxes
+GET http://localhost:8080/api/getAllAvailableBoxes
+# Response
+[
+{
+"txref": "box-001",
+"weightLimit": 80,
+"battery": "FULL",
+"state": "IDLE"
+}
+]
+
+
+## Check battery
+GET http://localhost:8080/api/checkBattery/box-002
+# Response
+{
+"txref": "box-002",
+"level": "FULL",
+"meter": 85
+}
+
+# Error 
+{
+"error": "Box not found: box-00X"
+}
 

@@ -104,7 +104,7 @@ public class Implementation  implements LoadingService {
     }
 
     private Box getBoxByRef(String txref) {
-        return boxRepo.findDistinctFirstByTxref(txref).orElseThrow(() -> new NoItemException("Box not found: " + txref));
+        return boxRepo.findDistinctFirstByTxref(txref).orElseThrow(() -> new NoItemException("Box not found for " + txref));
     }
 
 }
