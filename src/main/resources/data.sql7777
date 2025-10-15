@@ -1,3 +1,0 @@
--- INSERT INTO boxes (txref, weight_limit, battery, state, version) VALUES ('BOX001', 500, 80, 'IDLE', 0);
--- INSERT INTO boxes (txref, weight_limit, battery, state, version) VALUES ('BOX002', 300, 20, 'IDLE', 0);
--- INSERT INTO boxes (txref, weight_limit, battery, state, version) VALUES ('BOX003', 200, 50, 'IDLE', 0);
