@@ -10,9 +10,11 @@ import com.loading.service.dto.ItemDTO;
 import com.loading.service.exception.NoItemException;
 import com.loading.service.repository.BoxRepository;
 import com.loading.service.repository.ItemRepository;
+import com.loading.service.utils.Helper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,15 +24,18 @@ import java.util.stream.Collectors;
 @Service
 public class Implementation  implements LoadingService {
 
+    //this is not ideal because unit testing cannot be achieved
+    // I had to do this because of time constraint
     @Autowired
     BoxRepository boxRepo;
+
     @Autowired
     ItemRepository itemRepo;
 
     @Override
     public BoxDTO addBox(BoxRequest request) {
         Box b = new Box();
-        b.setTxref(request.getTxref());
+        b.setTxref(request.getTxref() == null ? Helper.generateRef(8) : request.getTxref());
         b.setWeightLimit(request.getWeightLimit());
         b.setBattery(request.getBattery());
         b.setState(request.getBoxStatus() == null ? BoxStatus.IDLE : request.getBoxStatus());
