@@ -1,5 +1,7 @@
 package com.loading.service.utils;
 
+import com.loading.service.domain.BatteryStatus;
+
 import java.security.SecureRandom;
 
 public class Helper {
@@ -13,5 +15,14 @@ public class Helper {
             ref.append(CHARACTERS.charAt(index));
         }
         return ref.toString();
+    }
+
+
+    public static BatteryStatus mapBatteryLevel(int level) {
+        if (level >= 81) return BatteryStatus.FULL;
+        else if (level >= 61) return BatteryStatus.HIGH;
+        else if (level >= 41) return BatteryStatus.MEDIUM;
+        else if (level >= 21) return BatteryStatus.LOW;
+        else return BatteryStatus.CRITICAL;
     }
 }

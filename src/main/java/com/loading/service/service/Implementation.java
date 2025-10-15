@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.loading.service.utils.Helper.mapBatteryLevel;
+
 @Service
 public class Implementation  implements LoadingService {
 
@@ -97,7 +99,7 @@ public class Implementation  implements LoadingService {
         Map<String, Object> map = new HashMap<>();
         map.put("txref", box.getTxref());
         map.put("meter", box.getBattery());
-        map.put("level", BoxDTO.mapBatteryLevel(box.getBattery()));
+        map.put("level", mapBatteryLevel(box.getBattery()));
         return map;
     }
 
