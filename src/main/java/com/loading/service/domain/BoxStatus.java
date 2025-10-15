@@ -1,6 +1,6 @@
 package com.loading.service.domain;
 
-public enum Status {
+public enum BoxStatus {
     IDLE,
     LOADING,
     LOADED,

@@ -22,7 +22,6 @@ public class Box {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Id
     @Column(length = 20)
     @Size(max = 20)
     @NotBlank
@@ -37,7 +36,7 @@ public class Box {
     private int battery;
 
     @Enumerated(EnumType.STRING)
-    private Status state;
+    private BoxStatus state;
 
     @Version
     private Long version;

@@ -1,5 +1,5 @@
 package com.loading.service.dto;
-import com.loading.service.domain.Status;
+import com.loading.service.domain.BoxStatus;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -26,5 +26,5 @@ public class BoxRequest {
     @Max(100)
     private int battery;
 
-    private Status status;
+    private BoxStatus boxStatus;
 }

@@ -1,8 +1,10 @@
 package com.loading.service.service;
 
+import com.loading.service.domain.BatteryStatus;
 import com.loading.service.domain.Box;
 import com.loading.service.domain.Item;
-import com.loading.service.domain.Status;
+import com.loading.service.domain.BoxStatus;
+import com.loading.service.dto.BoxDTO;
 import com.loading.service.dto.BoxRequest;
 import com.loading.service.dto.ItemDTO;
 import com.loading.service.exception.NoItemException;
@@ -12,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,22 +28,22 @@ public class Implementation  implements LoadingService {
     ItemRepository itemRepo;
 
     @Override
-    public Box addBox(BoxRequest request) {
+    public BoxDTO addBox(BoxRequest request) {
         Box b = new Box();
         b.setTxref(request.getTxref());
         b.setWeightLimit(request.getWeightLimit());
         b.setBattery(request.getBattery());
-        b.setState(request.getStatus() == null ? Status.IDLE : request.getStatus());
-        return boxRepo.save(b);
+        b.setState(request.getBoxStatus() == null ? BoxStatus.IDLE : request.getBoxStatus());
+        b = boxRepo.save(b);
+        return BoxDTO.from(b);
     }
 
     @Override
-    public List<Item> loadItems(String txref, List<ItemDTO> dtos) {
-        Box box = getBox(txref);
+    public List<ItemDTO> loadItems(String txref, List<ItemDTO> dtos) {
+        Box box = getBoxByRef(txref);
         if (box.getBattery() < 25) {
-            throw new IllegalStateException("Box battery below 25% — cannot start loading");
+            throw new IllegalStateException("Battery level is less than 25% and cannot start loading");
         }
-
         int currentWeight = itemRepo.findByBoxTxref(txref).stream().mapToInt(Item::getWeight).sum();
         int incomingWeight = dtos.stream().mapToInt(ItemDTO::getWeight).sum();
 
@@ -47,19 +51,16 @@ public class Implementation  implements LoadingService {
             throw new IllegalStateException("Exceeds box weight limit");
         }
 
-        box.setState(Status.LOADING);
-        boxRepo.save(box);
-
-        List<Item> saved = new ArrayList<>();
         List<String> codes = dtos.stream().map(ItemDTO::getCode).collect(Collectors.toList());
         List<Item> items = itemRepo.findByCodeIn(codes);
         if (!items.isEmpty()) {
             throw new IllegalArgumentException("Duplicate items codes found");
         }
+        box.setState(BoxStatus.LOADING);
+        boxRepo.save(box);
+
+        List<Item> saved = new ArrayList<>();
         for (ItemDTO dto : dtos) {
-//            if (itemRepo.findByCode(dto.getCode()).isPresent()) {
-//                throw new IllegalArgumentException("Item code already exists: " + dto.getCode());
-//            }
             Item item = new Item();
             item.setName(dto.getName());
             item.setWeight(dto.getWeight());
@@ -68,31 +69,35 @@ public class Implementation  implements LoadingService {
             saved.add(item);
         }
         itemRepo.saveAll(saved);
-        box.setState(Status.LOADED);
+        box.setState(BoxStatus.LOADED);
         boxRepo.save(box);
-        return saved;
+        return saved.stream().map(ItemDTO::from).collect(Collectors.toList());
     }
 
     @Override
-    public List<Item> getItems(String txref) {
-        getBox(txref);
-        return itemRepo.findByBoxTxref(txref);
+    public List<ItemDTO> getItems(String txref) {
+        getBoxByRef(txref);//just for validation purpose
+        return itemRepo.findByBoxTxref(txref).stream().map(ItemDTO::from).collect(Collectors.toList());
     }
 
     @Override
-    public List<Box> getAvailableBoxes() {
-        return boxRepo.findAll().stream()
-                .filter(b -> b.getBattery() >= 25 && b.getState() == Status.IDLE)
-                .collect(Collectors.toList());
+    public List<BoxDTO> getBoxes() {
+        List<Box> boxes = boxRepo.findByBatteryGreaterThanEqualAndState(25, BoxStatus.IDLE);
+        return boxes.stream().map(BoxDTO::from).collect(Collectors.toList());
     }
 
     @Override
-    public int getBatteryLevel(String txref) {
-        Box box = getBox(txref);
-        return box.getBattery();
+    public Map<String, Object> getBatteryLevel(String txref) {
+        Box box = getBoxByRef(txref);
+        Map<String, Object> map = new HashMap<>();
+        map.put("txref", box.getTxref());
+        map.put("meter", box.getBattery());
+        map.put("level", BoxDTO.mapBatteryLevel(box.getBattery()));
+        return map;
     }
 
-    private Box getBox(String txref) {
+    private Box getBoxByRef(String txref) {
         return boxRepo.findDistinctFirstByTxref(txref).orElseThrow(() -> new NoItemException("Box not found: " + txref));
     }
+
 }

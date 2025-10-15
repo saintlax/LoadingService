@@ -1,6 +1,4 @@
 package com.loading.service.controller;
-import com.loading.service.domain.Box;
-import com.loading.service.domain.Item;
 import com.loading.service.dto.BoxDTO;
 import com.loading.service.dto.BoxRequest;
 import com.loading.service.dto.ItemDTO;
@@ -11,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/boxes")
@@ -23,37 +19,28 @@ public class BoxController {
     LoadingService service;
 
 
-    @PostMapping
-    public ResponseEntity<BoxDTO> createBox(@Valid @RequestBody BoxRequest req) {
-        Box box = service.addBox(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(BoxDTO.from(box));
+    @PostMapping("/addbox")
+    public ResponseEntity<BoxDTO> addBox(@Valid @RequestBody BoxRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.addBox(req));
     }
 
-    @PostMapping("/{txref}/load")
+    @PostMapping("/loadbox/{txref}")
     public ResponseEntity<List<ItemDTO>> loadBox(@PathVariable String txref, @Valid @RequestBody ItemRequest request) {
-        List<Item> items = service.loadItems(txref, request.getItems());
-        List<ItemDTO> dtos = items.stream().map(ItemDTO::from).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(service.loadItems(txref, request.getItems()));
     }
 
-    @GetMapping("/{txref}/items")
+    @GetMapping("/getItems/{txref}")
     public ResponseEntity<List<ItemDTO>> getItems(@PathVariable String txref) {
-        List<Item> items = service.getItems(txref);
-        return ResponseEntity.ok(items.stream().map(ItemDTO::from).collect(Collectors.toList()));
+        return ResponseEntity.ok(service.getItems(txref));
     }
 
-    @GetMapping("/available")
-    public ResponseEntity<List<BoxDTO>> available() {
-        List<BoxDTO> list = service.getAvailableBoxes().stream().map(BoxDTO::from).collect(Collectors.toList());
-        return ResponseEntity.ok(list);
+    @GetMapping("/getAllAvailableBoxes")
+    public ResponseEntity<List<BoxDTO>> availableBoxes() {
+        return ResponseEntity.ok(service.getBoxes());
     }
 
-    @GetMapping("/{txref}/battery")
+    @GetMapping("/checkBattery/{txref}")
     public ResponseEntity<Map<String, Object>> battery(@PathVariable String txref) {
-        int battery = service.getBatteryLevel(txref);
-        Map<String, Object> map = new HashMap<>();
-        map.put("txref", txref);
-        map.put("battery", battery);
-        return ResponseEntity.ok(map);
+        return ResponseEntity.ok(service.getBatteryLevel(txref));
     }
 }

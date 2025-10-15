@@ -1,16 +1,16 @@
 package com.loading.service.service;
 
-import com.loading.service.domain.Box;
-import com.loading.service.domain.Item;
+import com.loading.service.dto.BoxDTO;
 import com.loading.service.dto.BoxRequest;
 import com.loading.service.dto.ItemDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface LoadingService {
-    Box addBox(BoxRequest request);
-    List<Item> loadItems(String txref, List<ItemDTO> dtos);
-    List<Item> getItems(String txref);
-    List<Box> getAvailableBoxes();
-    int getBatteryLevel(String txref);
+    BoxDTO addBox(BoxRequest request);
+    List<ItemDTO> loadItems(String txref, List<ItemDTO> dtos);
+    List<ItemDTO> getItems(String txref);
+    List<BoxDTO> getBoxes();
+    Map<String, Object> getBatteryLevel(String txref);
 }
